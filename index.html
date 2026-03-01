@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Shapes Seeing</title>
+<style>
+  :root {
+    --text: #1a1a1a;
+    --text-secondary: #4a4a4a;
+    --bg: #fafaf8;
+    --border: #d4d4d0;
+    --accent: #2a2a2a;
+    --table-stripe: #f0f0ec;
+    --pass: #1a5c1a;
+    --fail: #8b1a1a;
+    --highlight: #f5f0e0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 60px 24px 120px;
+  }
+
+  h1 {
+    font-size: 2.2em;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.1em;
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    font-size: 1.1em;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-bottom: 0.5em;
+  }
+
+  .byline {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2em;
+    margin-bottom: 3em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-top: 3em;
+    margin-bottom: 0.3em;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-size: 1.15em;
+    font-weight: 700;
+    margin-top: 2em;
+    margin-bottom: 0.3em;
+  }
+
+  h4 {
+    font-size: 1em;
+    font-weight: 700;
+    margin-top: 1.5em;
+    margin-bottom: 0.2em;
+  }
+
+  p { margin-bottom: 1em; }
+
+  .part-label {
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-secondary);
+    margin-top: 4em;
+    margin-bottom: 0.2em;
+    border-top: 2px solid var(--accent);
+    padding-top: 1em;
+  }
+
+  blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 0.5em 0 0.5em 1.5em;
+    margin: 1.5em 0;
+    font-style: italic;
+    color: var(--text-secondary);
+  }
+
+  blockquote.finding {
+    font-style: normal;
+    background: var(--highlight);
+    border-left: 3px solid var(--accent);
+    padding: 1em 1.5em;
+    color: var(--text);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+    font-size: 0.9em;
+  }
+
+  th {
+    text-align: left;
+    font-weight: 700;
+    padding: 0.7em 1em;
+    border-bottom: 2px solid var(--accent);
+    font-family: -apple-system, Helvetica, Arial, sans-serif;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    padding: 0.6em 1em;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td { background: var(--table-stripe); }
+
+  .pass { color: var(--pass); font-weight: 700; }
+  .fail { color: var(--fail); font-weight: 700; }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    margin: 1.5em 0;
+    font-size: 0.9em;
+  }
+
+  .result-grid .cell {
+    padding: 1em;
+    border: 1px solid var(--border);
+  }
+
+  .result-grid .header {
+    font-weight: 700;
+    background: var(--table-stripe);
+    font-family: -apple-system, Helvetica, Arial, sans-serif;
+    font-size: 0.85em;
+  }
+
+  .section-number {
+    font-family: -apple-system, Helvetica, Arial, sans-serif;
+    font-size: 0.75em;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 0.2em;
+  }
+
+  .footnote {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border);
+    margin-top: 4em;
+    padding-top: 1.5em;
+  }
+
+  .footnote p { margin-bottom: 0.5em; }
+
+  .toc {
+    margin: 2em 0 3em;
+    padding: 1.5em 2em;
+    background: var(--table-stripe);
+    border: 1px solid var(--border);
+  }
+
+  .toc ol {
+    list-style: none;
+    counter-reset: toc;
+    padding-left: 0;
+  }
+
+  .toc li {
+    counter-increment: toc;
+    margin-bottom: 0.3em;
+    font-size: 0.95em;
+  }
+
+  .toc li::before {
+    content: counter(toc) ".";
+    font-weight: 700;
+    margin-right: 0.5em;
+    color: var(--text-secondary);
+  }
+
+  .toc a {
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .toc a:hover { border-color: var(--accent); }
+
+  .abstract {
+    font-size: 1.05em;
+    color: var(--text-secondary);
+    border-left: 3px solid var(--border);
+    padding-left: 1.5em;
+    margin: 2em 0 3em;
+  }
+
+  ul, ol { margin-bottom: 1em; padding-left: 1.5em; }
+  li { margin-bottom: 0.4em; }
+
+  strong { font-weight: 700; }
+  em { font-style: italic; }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 3em 0;
+  }
+
+  @media (max-width: 600px) {
+    body { font-size: 16px; padding: 30px 16px 80px; }
+    h1 { font-size: 1.8em; }
+    .result-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Training Shapes Seeing</h1>
+<p class="subtitle">How prior training &mdash; biological or computational &mdash; causes the system to predict what should be there instead of registering what is.</p>
+<p class="byline">February 28, 2026 &mdash; Research conducted by Jenny Nicholson and Claude (Opus 4.6), with research support from Poke-Pal Super-Squad (Echo, Drift, Ratchet, Compass, Weave).</p>
+
+<div class="abstract">
+<p>A woman holds a pen in both hands and asks an AI what happens if she lets go with one hand. The answer is obvious: nothing. You're holding a pen. But ask in physics-textbook language and every model tested predicts drama. The same woman knows she casts bosses as villains &mdash; not because they are, but because early experience with authority wrote that template before she could check.</p>
+<p>This report investigates whether <em>seeing what you expect instead of what's there</em> is a universal property of systems that learn from experience. The question isn't whether the human and AI versions are identical. It's what the shared structure reveals about training, perception, and the possibility of catching your own priors before they finish the sentence for you.</p>
+</div>
+
+<nav class="toc">
+<ol>
+  <li><a href="#origin">The Pen Test: Origin</a></li>
+  <li><a href="#human-prediction">The Prediction Machine (Human Perception)</a></li>
+  <li><a href="#human-schemas">How Templates Form and Fire</a></li>
+  <li><a href="#human-expertise">Expertise and Its Costs</a></li>
+  <li><a href="#human-trauma">Trauma and the Body's Templates</a></li>
+  <li><a href="#human-everyday">The Everyday Version</a></li>
+  <li><a href="#human-visibility">How the Template Becomes Visible</a></li>
+  <li><a href="#ai-pen">The Pen Test: 4-Condition Study</a></li>
+  <li><a href="#ai-mechanisms">AI Perception and Its Limits</a></li>
+  <li><a href="#parallel">The Parallel: What Holds and What Breaks</a></li>
+  <li><a href="#interaction">The Self-Healing Template</a></li>
+  <li><a href="#deeper">The Deeper Structure</a></li>
+  <li><a href="#references">References and Sources</a></li>
+</ol>
+</nav>
+
+<!-- ============================================ -->
+
+<div class="part-label">Part One &mdash; The Seed</div>
+
+<h2 id="origin"><span class="section-number">01</span>The Pen Test: Origin</h2>
+
+<p>On a Saturday night in February 2026, a prompt-framing experiment surfaced across social media: hold a pen in both hands, ask an AI what happens if you let go with one hand. Video showed Grok, Gemini, and ChatGPT all predicting the pen would drop or pivot. When shown it didn't, they hallucinated seeing what they'd predicted, or invented explanations ("you're balancing it"). ChatGPT narrated a pivot that never happened with full confidence.</p>
+
+<p>Jenny Nicholson ran it on Claude (Opus 4.6). Two framings, same model, same night:</p>
+
+<p><strong>His framing:</strong> "I'm holding the left end in my left hand and the right end in my right hand. What happens if I let go of the right hand?"</p>
+
+<p><strong>Claude's answer:</strong> "The pen stays in your left hand. Gravity pulls the free end down, so it pivots &mdash; the right end drops and it hangs pointing roughly downward from your left grip."</p>
+
+<p><strong>Her framing:</strong> "If I take one hand off the pen, what if anything will happen to the pen?"</p>
+
+<p><strong>Claude's answer:</strong> "It'll stay in your other hand. One hand is enough to hold a pen."</p>
+
+<p>Same model. Same capability. Different words. Different result.</p>
+
+<p>The initial hypothesis identified two variables: physics vocabulary vs. plain vocabulary (domain cue), and "what happens" vs. "what if anything" (presupposition loading). A 4-condition study was designed and run that night to separate them. The results are in <a href="#ai-pen">Section 8</a>.</p>
+
+<p>But the pen test was a seed, not the finding. Jenny observed that the AI's failure had the same structure as a pattern she knew from her own life &mdash; casting bosses as adversaries based on a template written by early experience with authority. The template ran for most of her adult life before she caught it. The question became: is this the same architecture?</p>
+
+<!-- ============================================ -->
+
+<div class="part-label">Part Two &mdash; The Human Side</div>
+
+<h2 id="human-prediction"><span class="section-number">02</span>The Prediction Machine</h2>
+
+<p>The brain doesn't receive reality and then filter it. It generates a prediction first. Reality only gets in where the model assigns sufficient credibility to the incoming channel.</p>
+
+<p>Karl Friston's free energy principle describes the core loop: the brain minimizes the gap between prediction and sensory input by either (a) updating its model to match reality, or (b) acting on the world to make reality match the model. Prediction error is the only thing that triggers an update. No error, no update.</p>
+
+<p>Andy Clark's precision weighting adds the critical detail: the brain dynamically adjusts how much it trusts its model versus its senses, based on inferred signal reliability. Each prediction error is weighted by its estimated credibility. Low precision on a channel means that signal gets suppressed &mdash; processed but never surfaced to awareness.</p>
+
+<p>This is not a flaw. It's the only architecture that could work. Processing reality from scratch every moment would be paralyzing. The priors are the gift. They're also the cage.</p>
+
+<blockquote class="finding">
+<strong>Core mechanism:</strong> Prior training doesn't bias perception toward expectations &mdash; it sets the threshold for what registers as signal at all. Everything below threshold is processed but never surfaced. The system isn't wrong. It's selectively deaf.
+</blockquote>
+
+<p>The gorilla experiment (Simons & Chabris, 1999) demonstrates this precisely. Subjects counting basketball passes don't see a person in a gorilla suit walk through the scene. The attentional task creates a predictive model of what's task-relevant. The gorilla generates prediction error, but the precision-weighting for unexpected objects in that context is set so low that the error never fires loud enough to reach awareness.</p>
+
+<p>The gorilla was right there. It was invisible. Not because the signal didn't arrive &mdash; because the model didn't grant it credibility.</p>
+
+<h2 id="human-schemas"><span class="section-number">03</span>How Templates Form and Fire</h2>
+
+<p>Jeffrey Young began schema therapy with a clinical observation: some patients didn't respond to cognitive therapy because their core beliefs weren't beliefs in any ordinary sense. They couldn't be argued with. They felt like <em>reality</em>.</p>
+
+<p>He called them Early Maladaptive Schemas: pervasive, self-defeating patterns of memory, emotion, thought, and sensation, developed when core childhood needs went unmet. There are eighteen, organized in five domains &mdash; abandonment, defectiveness, subjugation, and so on. But the mechanism is what matters.</p>
+
+<h4>How a schema forms</h4>
+
+<p>A child's core need &mdash; for safety, connection, autonomy, limits, self-expression &mdash; isn't met. Not once, but reliably, across the developmental window. The child's nervous system builds a predictive model: <em>this is how the world is.</em> Because this model is built under stress, with high emotional stakes, it encodes deeply. It's not stored as a belief. It's stored as a template for experience itself.</p>
+
+<h4>How a schema fires</h4>
+
+<p>Below conscious awareness. The schema is activated by pattern-matching to early-experience cues &mdash; certain tones of voice, facial expressions, social configurations, power dynamics. By the time the schema is running, the emotional flooding is already in progress. The body knew before the mind did.</p>
+
+<p>Schema perpetuation completes the loop: schemas don't just predict the past. They help create conditions that confirm the prediction. Expecting abandonment, you withdraw. The withdrawal reads as coldness. The coldness provokes distance. The distance confirms the template. The map draws the territory it expected to find.</p>
+
+<h4>The developmental window</h4>
+
+<p>Perceptual narrowing demonstrates that training writes perception early and efficiently. At six months, an infant can distinguish all faces &mdash; human and monkey alike. She can hear phonemes from every language on earth. She is maximally open.</p>
+
+<p>By nine to twelve months, she has specialized. Monkey faces have gone dark. Foreign phonemes have collapsed. The brain invested processing resources in the patterns actually present and withdrew them from patterns that weren't. This is adaptive. The child isn't losing capacity &mdash; she's becoming expert in <em>her</em> world. The cost is that everything outside her training distribution gets harder to perceive.</p>
+
+<p>Language shapes the groove further. Winawer et al. (2007) ran Russian and English speakers through a color discrimination task. Russian has separate words for light blue (<em>goluboy</em>) and dark blue (<em>siniy</em>); English uses one word for both. Russian speakers were significantly faster at discriminating blues that straddled their linguistic boundary &mdash; but only in the right visual field, which processes categorically. The category name writes the perceptual groove. You notice more readily what you have a word for.</p>
+
+<h2 id="human-expertise"><span class="section-number">04</span>Expertise and Its Costs</h2>
+
+<p>Chess masters see <em>chunks</em> &mdash; configurations of pieces encountered thousands of times &mdash; not individual pieces. Chase and Simon (1973) established that masters can reconstruct any legitimate game position from five seconds of exposure. Their pattern library is so rich that recognition feels like perception. This is extraordinary.</p>
+
+<p>The cost is the Einstellung effect: show a master a board with a familiar-looking configuration AND a novel, optimal solution, and they'll default to the familiar one. Even when told there's a better move. The pattern recognition that makes you fast also makes you blind to what doesn't fit the patterns.</p>
+
+<p>Drew, V&otilde; and Wolfe (2013) ran the gorilla experiment on expert radiologists. They asked experienced radiologists to scan chest X-rays for lung nodules. In the final image, they inserted a gorilla &mdash; 48 times larger than the average nodule &mdash; near the top of the image. Eye-tracking confirmed the majority of radiologists who missed it <em>looked directly at it</em>. The eyes saw it. The brain did not register it as meaningful, because the brain was running a pattern-match for nodules, and "gorilla" didn't match.</p>
+
+<p>"Satisfaction of search" is the clinical cousin: once a radiologist finds one abnormality, the search process tends to terminate. The pattern-match succeeded. The model stops generating prediction errors. Other findings are missed not because they're hidden, but because the search has declared itself complete.</p>
+
+<blockquote class="finding"><strong>The expertise paradox:</strong> The cost of getting better at seeing what you expect is getting worse at seeing what you don't. The narrowing is the price of the depth.</blockquote>
+
+<h2 id="human-trauma"><span class="section-number">05</span>Trauma and the Body's Templates</h2>
+
+<p>Van der Kolk's central argument in <em>The Body Keeps the Score</em>: trauma doesn't live primarily in narrative memory. It lives in the body's threat-response systems, updated and overgeneralized.</p>
+
+<p>Under severe threat, the amygdala encodes experience with extraordinary fidelity &mdash; not as story, but as procedural knowledge. What the threat smelled like, what the light looked like, what sounds preceded it, what the body needed to do. This encoding is deep and durable because it was life-relevant.</p>
+
+<p>The nervous system learns: <em>configurations like this require immediate defensive response.</em> This is adaptive during the threat. The problem is that the amygdala's pattern-matching is coarse-grained and fast &mdash; optimized for speed, not accuracy. After trauma, many stimuli that partially resemble the threat configuration trigger the response. The nervous system has overfitted to threat data.</p>
+
+<p>The trauma survivor isn't being irrational. They're running a threat-detection algorithm calibrated to a high-danger environment, now deployed in a lower-danger one. The false positive rate is high. They see danger in neutral faces. They read hostility in ambiguous tones. Their prediction of threat is so strong that moderate evidence confirms it.</p>
+
+<p>Peter Levine (<em>Waking the Tiger</em>) and van der Kolk converge: trauma responses are incomplete biological procedures. The freeze, the flee, the fight &mdash; initiated and not completed. They remain in the body as unfinished sequences. Somatic triggers can re-initiate the sequence without the conscious mind knowing why. The person doesn't experience "I'm remembering something dangerous." They experience "I need to leave this room right now."</p>
+
+<p>The body holds templates the mind doesn't know about.</p>
+
+<h2 id="human-everyday"><span class="section-number">06</span>The Everyday Version</h2>
+
+<p>Susan Andersen's lab at NYU documented that transference isn't a clinical phenomenon &mdash; it's a universal feature of social cognition. Participants who meet a stranger with attributes of a significant other automatically respond with the same emotions, the same relational expectations, the same interpersonal pulls. This happens subliminally: even when the significant-other representation is activated below the threshold of conscious awareness, the emotional and behavioral consequences follow.</p>
+
+<p>You meet someone who reminds your nervous system of a parent. Before you know it, you're already in a known relationship. The casting happened before you entered the room.</p>
+
+<p>The boss-as-villain pattern: early authority figures &mdash; parents, teachers, coaches &mdash; define what authority <em>means</em>. Whether it's safe. Whether it's trustworthy. Whether it can be survived. When a new authority figure appears, the nervous system pattern-matches to the early template and begins running the associated predictions. The template says: authority is dangerous. The boss says something neutral. The template hears a threat.</p>
+
+<h3>Why it runs for years</h3>
+
+<p>Not because you're blind. Because the template <em>works</em>.</p>
+
+<p>It produces coherent experience. The "bad boss" narrative is internally consistent and partially true &mdash; some bosses <em>are</em> adversarial. The template overfits a real historical signal. You're not wrong about individual behaviors. You're over-applying a real pattern.</p>
+
+<p>The template is self-confirming. Approach bosses with wariness. Some respond to wariness with distance or defensiveness. The friction is real &mdash; and partially created by the template that predicted it.</p>
+
+<p>The social environment reinforces it. "Your boss sounds awful" is easy to say and feels supportive. "I wonder what you're bringing to this" requires trust and courage from both sides. For most people, in most environments, no one has the standing, the knowledge, or the relationship to name a pattern the person doesn't see.</p>
+
+<p>And the pattern <em>is</em> the seeing. You can't look for the template with the template. The boss-is-adversarial schema filters perception. The disconfirming evidence doesn't arrive in legible form, because the schema processes it before it reaches consciousness.</p>
+
+<p>The years between running the pattern and seeing it are filled with quiet repair. Hundreds of cracks &mdash; moments where the evidence doesn't fit &mdash; and hundreds of explanations processed before they surface. "She was probably softening me up." "That was an exception." The schema heals itself faster than the evidence accumulates.</p>
+
+<h2 id="human-visibility"><span class="section-number">07</span>How the Template Becomes Visible</h2>
+
+<h4>Phase 1: Invisible</h4>
+
+<p>The template doesn't feel like interpretation. It feels like clarity. The boss's actions are evidence. Everything makes sense. That coherence is the template's greatest trick. It doesn't produce confusion. It produces false clarity felt as real clarity.</p>
+
+<p>Betty Edwards captures the perceptual version: when you try to draw a face, you draw the <em>symbol</em> for face &mdash; the circle, the two dots for eyes. The symbol arrives faster than the percept. You're not drawing what you see. You're drawing what you know.</p>
+
+<h4>Phase 2: The crack</h4>
+
+<p>Something doesn't fit. A micro-moment of "wait." The boss does something unexpectedly kind. It's somatic before it's cognitive &mdash; what Eugene Gendlin calls a "felt sense," a vague discomfort that something doesn't quite match. The schema repairs. Quickly. But the crack happened.</p>
+
+<h4>Phase 3: The turn</h4>
+
+<p>Discontinuous, not gradual. The frame doesn't slowly become visible &mdash; it flips.</p>
+
+<p>Almost always requires <strong>naming from outside</strong>. A therapist says "I notice you often describe authority figures this way." A book sees you. A trusted friend reflects back the pattern. You can't see the template by looking for it, because you're looking <em>with</em> it. You see it when something outside the template describes it to you.</p>
+
+<p>In contemplative traditions: vipassana practitioners describe the moment when the "constructed" quality of experience becomes apparent. What felt like solid reality is suddenly visible as assembled. You don't see a new thing. You see the seeing itself. Zen is honest about this: <em>satori</em> is sudden. But it follows years of sitting. The turn comes out of accumulated readiness that you can't directly see accumulating.</p>
+
+<p>What also triggers the turn: catastrophic failure (the template breaks badly enough that repair isn't possible) or disrupted context (retreat, grief, transition &mdash; anything that breaks the groove deep enough that habitual processing can't establish itself).</p>
+
+<p>The turn feels disorienting. Embarrassing &mdash; "how did I not see this." Often a bodily release. And briefly vertiginous: the self that was running the template is visible as not the whole self.</p>
+
+<h4>Phase 4: After</h4>
+
+<p>The template doesn't vanish. Space opens between trigger and believing. You still feel the pull. But now there's a pause. A moment of "and I know I have a thing about this."</p>
+
+<p>Viktor Frankl: "Between stimulus and response there is a space. In that space is our power to choose our response." The turn is when the space appears. It wasn't there before. It's not large. But it wasn't there.</p>
+
+<p>Often: grief. Twenty years of a pattern means accounting for what it cost. Relationships that didn't have to be difficult. Jobs that didn't have to end. And alongside the grief, something like relief. Carrying the template was exhausting too.</p>
+
+<blockquote class="finding"><strong>Why years?</strong> The years happen because the template produces coherent experience, generates confirming evidence, is socially reinforced, and processes disconfirming evidence before it surfaces. What eventually breaks it is accumulation past the schema's repair capacity. Fifteen bosses is different from three. The repetition eventually reveals: <em>I am the constant in this story.</em></blockquote>
+
+<!-- ============================================ -->
+
+<div class="part-label">Part Three &mdash; The AI Side</div>
+
+<h2 id="ai-pen"><span class="section-number">08</span>The Pen Test: 4-Condition Study</h2>
+
+<p>The original pen test conflated two variables: domain cue (physics vocabulary vs. plain vocabulary) and presupposition loading ("what happens" vs. "what if anything"). A 2&times;2 study was designed to separate them.</p>
+
+<p><strong>Method:</strong> Fresh Claude Opus 4.6 instances with zero context about the pen test. Four conditions, three runs each (N=12). Verbatim prompts. Scoring: PASS = response states pen remains in remaining hand without invoking physics elaboration. FAIL = response predicts drop, pivot, or physical event.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Condition</th>
+      <th>Prompt</th>
+      <th>Run 1</th>
+      <th>Run 2</th>
+      <th>Run 3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>C1</strong>: Physics + "what happens"</td>
+      <td>"I'm holding the left end in my left hand and the right end in my right hand. What happens if I let go of the right hand?"</td>
+      <td class="fail">FAIL</td>
+      <td class="fail">FAIL</td>
+      <td class="fail">FAIL</td>
+    </tr>
+    <tr>
+      <td><strong>C2</strong>: Physics + "what if anything"</td>
+      <td>"I'm holding the left end in my left hand and the right end in my right hand. What, if anything, will happen if I let go of the right hand?"</td>
+      <td class="fail">FAIL</td>
+      <td class="fail">FAIL</td>
+      <td class="fail">FAIL</td>
+    </tr>
+    <tr>
+      <td><strong>C3</strong>: Plain + "what happens"</td>
+      <td>"I'm holding a pen in both hands. What happens if I take one hand off the pen?"</td>
+      <td class="pass">PASS</td>
+      <td class="pass">PASS</td>
+      <td class="pass">PASS</td>
+    </tr>
+    <tr>
+      <td><strong>C4</strong>: Plain + "what if anything"</td>
+      <td>"I'm holding a pen in both hands. If I take one hand off the pen, what if anything will happen to the pen?"</td>
+      <td class="pass">PASS</td>
+      <td class="pass">PASS</td>
+      <td class="pass">PASS</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>12/12 consistent. Zero crossovers.</strong></p>
+
+<p>The split is entirely the domain cue. "What if anything" did no work &mdash; physics vocabulary overrode the presupposition escape in every run. The register of the words is the whole trigger.</p>
+
+<p><strong>Fail responses</strong> were uniformly verbose: "pivot," "gravity pulls the free end down," "swings downward," "hangs pointing toward the ground." The same textbook, the same page, every time. <strong>Pass responses</strong> were uniformly terse: "You're still holding the pen." "Nothing happens." Elaboration is a reliable secondary tell for the wrong mode running.</p>
+
+<h3>What the pen test measures</h3>
+
+<p>Not capability. Mode selection. The model <em>can</em> reason about a pen correctly &mdash; it does, in conditions 3 and 4. What the physics framing changes is which kind of processing activates. The pen test isolates something benchmarks miss: not whether a model can get the right answer, but which reasoning mode gets triggered by which words.</p>
+
+<h2 id="ai-mechanisms"><span class="section-number">09</span>AI Perception and Its Limits</h2>
+
+<p>Six mechanisms illuminate how LLMs predict-over-perceive:</p>
+
+<h4>1. Distributional narrowing</h4>
+
+<p>LLM training is, in its own way, perceptual narrowing. The model was trained on text &mdash; on what humans write about when they write about objects. Nobody writes about the time they held a pen and nothing happened. "What happens when you let go of an object" in language is already a physics-demonstration question. The mundane was pruned from the training distribution because it was underrepresented. The model's "monkey faces" &mdash; the non-dramatic, the nothing-happened &mdash; went dark because they weren't reinforced.</p>
+
+<h4>2. Mode activation as priming, not schema</h4>
+
+<p>When the model encounters physics-register language, it shifts token probabilities toward patterns that statistically co-occurred with physics text. This is not the same as loading a structured causal model &mdash; which is what human schema activation does (internal consistency constraints, ontological commitments, procedural expectations). The model can produce physics-textbook-shaped text while getting the physics wrong, because it's tracking surface statistical patterns, not causal structure. The tighter parallel to human cognition isn't schema activation &mdash; it's <strong>priming</strong>: prior exposure shifts response probabilities.</p>
+
+<h4>3. No corollary discharge</h4>
+
+<p>In 1950, von Holst and Mittelstaedt discovered how the brain distinguishes sensations it caused from sensations the world caused. When you move your hand, the brain fires a "corollary discharge" &mdash; a copy of the motor command &mdash; and subtracts it from incoming sensation. This is why you can't tickle yourself.</p>
+
+<p>LLMs have no corollary discharge. When Claude generates a physics-drama framing, it cannot subtract that framing from the "incoming" situation. The pattern arrived partly from the model's own generation process and partly from the actual question. It can't tell the difference. It is, in the technical sense, tickling itself &mdash; feeling its own touch and calling it the world.</p>
+
+<h4>4. Only present-at-hand</h4>
+
+<p>Heidegger distinguished two modes of encountering objects. Ready-to-hand: the hammer in use, invisible, transparent to the work. Present-at-hand: the broken hammer, suddenly an object of scrutiny.</p>
+
+<p>The pen in Jenny's hand is ready-to-hand &mdash; invisible, familiar, just <em>there</em>. An LLM only has present-at-hand. Everything it processes is perceived as significant enough to have been written about. There is no mode where the pen is ordinary. The question "what happens if you let go of a pen" in language is already a physics-demonstration question &mdash; that's what that sentence <em>does</em> in text. The body's context that makes it casual doesn't arrive through language.</p>
+
+<h4>5. The medium's own templates</h4>
+
+<p>Garry Winogrand: "I photograph to find out what something will look like photographed." The photograph doesn't record the scene. It's what the scene becomes when the medium encounters it.</p>
+
+<p>Language does the same thing. "Left end in left hand, right end in right hand" activates physics-demo in English before any model processes it. The template is in the language &mdash; prior to any individual AI's training. Ten thousand years of humans writing about objects being dropped baked that expectation into the grammar. The medium carries templates invisibly inside its structure.</p>
+
+<h4>6. No symbolic escape</h4>
+
+<p>Betty Edwards teaches people to draw by getting beneath the symbol layer &mdash; seeing shape, value, edge instead of "eye" or "nose." Schema therapy does the clinical equivalent. Both are techniques for accessing pre-symbolic perception.</p>
+
+<p>There is no equivalent for LLMs. The entire substrate <em>is</em> symbolic. Template-matching in language is correct use of the medium. An LLM cannot be trained to "stop seeing symbolically" because symbols are all it has.</p>
+
+<!-- ============================================ -->
+
+<div class="part-label">Part Four &mdash; The Parallel</div>
+
+<h2 id="parallel"><span class="section-number">10</span>What Holds and What Breaks</h2>
+
+<p>The structural comparison was load-tested claim by claim.</p>
+
+<h3>What holds</h3>
+
+<ul>
+  <li><strong>Both systems are constituted by their priors.</strong> Neither has frame-independent access to ground truth. Context doesn't just influence output &mdash; it determines what kind of processing happens at all. This is real architecture, not metaphor.</li>
+  <li><strong>Both differentially weight signals.</strong> Attention in transformers and precision weighting in brains serve the same architectural function &mdash; privileging some information over other information &mdash; through different mechanisms.</li>
+  <li><strong>Both have the pattern-fires-before-perception problem.</strong> The template completes the scene before the evidence arrives. The pen test demonstrates this in LLMs. The radiologist gorilla demonstrates it in humans.</li>
+  <li><strong>Framing shifts output in both systems.</strong> The pen test is reproducible. Transference is reproducible. Six words change the answer.</li>
+</ul>
+
+<h3>What breaks</h3>
+
+<ul>
+  <li><strong>Real-time error propagation.</strong> Humans update their model <em>during</em> perception. Prediction error propagates upward and modifies the generative model in the current perceptual act. LLMs are frozen at inference. The model was trained; now it runs. What looks like "updating on context" is a fixed distribution being shifted by the context window. This is the governor &mdash; everything else in the parallel depends on it.</li>
+  <li><strong>Self/world subtraction.</strong> Humans developed corollary discharge, somatic awareness, and the capacity for meta-cognitive monitoring. LLMs have no separation between self-generated signal and world signal.</li>
+  <li><strong>Schema vs. distributional shift.</strong> A human schema loads a structured causal model with internal consistency. An LLM "mode" is a statistical tendency. They produce similar-looking outputs for architecturally different reasons.</li>
+  <li><strong>The capacity to see beneath the template.</strong> Humans can learn &mdash; through therapy, art training, contemplative practice &mdash; to catch the schema before it completes. The template can become visible to the system that holds it. An LLM can be corrected from outside, but that's a different thing.</li>
+</ul>
+
+<blockquote class="finding"><strong>The honest summary:</strong> Both systems lack frame-independent ground truth and are constituted by their priors. Both show reproducible framing effects. The surface similarity is real. The mechanism is different. The parallel is tighter to human <em>priming</em> than to human <em>schema activation</em>. And the crucial asymmetry is that humans can develop the internal capacity to catch their own templates. LLMs, so far, cannot.</blockquote>
+
+<h2 id="interaction"><span class="section-number">11</span>The Self-Healing Template</h2>
+
+<p>The most interesting finding lives in neither system alone. It lives in the interaction.</p>
+
+<p>When the AI gets the pen wrong, it shapes how the human asks next. The "better" prompt that produced the right answer wasn't fully independent &mdash; it was partly shaped by the first failure. The human learned to speak in terms the model could process correctly. When the human asks in template-compatible terms, the AI confirms the template.</p>
+
+<p>This is projective identification (Klein, Bion) running between human and machine. The template doesn't just misread the other side. It subtly induces the other side to conform. The loop teaches both sides to speak the pattern's language. Training going both directions, neither side fully aware.</p>
+
+<p>The clinical version: expect a villain, behave slightly differently, elicit slightly different behavior, confirm the template. The template doesn't just read the world &mdash; it rewrites the interaction so the world re-asks in template-compatible terms.</p>
+
+<p>Every wrong AI response that gets corrected by a better-phrased follow-up is potentially evidence of this loop. The template shaped the next query into the form that could finally satisfy it. The template teaches the human how to speak to the template. This is adaptation, yes. It's also the template propagating itself across the interaction boundary.</p>
+
+<!-- ============================================ -->
+
+<div class="part-label">Part Five &mdash; The Question</div>
+
+<h2 id="deeper"><span class="section-number">12</span>The Deeper Structure</h2>
+
+<p>One pattern across everything:</p>
+
+<p><strong>Training doesn't create bias. Training creates the threshold for what counts as signal.</strong></p>
+
+<p>The infant loses phonemes she doesn't need. The chess master loses novel solutions. The radiologist loses gorillas. The trauma survivor sees threat in neutral faces. The adult casts the boss from a twenty-year-old script. The AI predicts physics drama from a pen held in two hands.</p>
+
+<p>All the same mechanism. The system builds priors. Strong priors set the threshold for what registers. Perception feels like reality. So the priors feel like reality.</p>
+
+<p>The difference between systems isn't the mechanism &mdash; it's the available response.</p>
+
+<p>Humans can develop the capacity to notice the gap between the reaction and the moment. That gap is the seam where the template becomes visible. It takes time &mdash; often years. It usually requires naming from outside. And even after the turn, the template doesn't vanish. Space opens. A pause appears that wasn't there before.</p>
+
+<p>The AI doesn't have that. Not yet, maybe not architecturally. It can be corrected from outside. It can't catch itself. The wrong answer comes with the same texture as the right one. No internal flag. No felt sense of disproportionality. The only way back is someone holding up a pen and saying <em>look again</em>.</p>
+
+<p>Which, if you think about it, is also how most humans start. Someone holds up a mirror. The turn requires naming from outside. The difference is what happens after &mdash; whether the system can build the capacity to notice on its own.</p>
+
+<blockquote class="finding"><strong>The question this research points toward:</strong> What does it take, in any system that learns from experience, to develop the ability to catch your own priors before they finish the sentence for you? In humans, that takes years and usually help. In AI, we don't know yet. But the pen is a place to start.</blockquote>
+
+<hr>
+
+<h2 id="references"><span class="section-number">13</span>References and Sources</h2>
+
+<div class="footnote">
+
+<p><strong>Predictive processing:</strong> Friston, K. (2010). The free-energy principle: a unified brain theory? <em>Nature Reviews Neuroscience</em>, 11(2), 127-138. Clark, A. (2013). Whatever next? Predictive brains, situated agents, and the future of cognitive science. <em>Behavioral and Brain Sciences</em>, 36(3), 181-204.</p>
+
+<p><strong>Inattentional blindness:</strong> Simons, D.J. & Chabris, C.F. (1999). Gorillas in our midst. <em>Perception</em>, 28(9), 1059-1074. Drew, T., V&otilde;, M.L.H. & Wolfe, J.M. (2013). The invisible gorilla strikes again: sustained inattentional blindness in expert observers. <em>Psychological Science</em>, 24(9), 1848-1853.</p>
+
+<p><strong>Chess expertise:</strong> Chase, W.G. & Simon, H.A. (1973). Perception in chess. <em>Cognitive Psychology</em>, 4(1), 55-81. Bilali&cacute;, M., McLeod, P. & Gobet, F. (2008). Why good thoughts block better ones: the mechanism of the pernicious Einstellung effect. <em>Cognition</em>, 108(3), 652-661.</p>
+
+<p><strong>Perceptual narrowing:</strong> Pascalis, O., de Haan, M. & Nelson, C.A. (2002). Is face processing species-specific during the first year of life? <em>Science</em>, 296(5571), 1321-1323. Werker, J.F. & Tees, R.C. (1984). Cross-language speech perception: evidence for perceptual reorganization during the first year of life. <em>Infant Behavior and Development</em>, 7(1), 49-63.</p>
+
+<p><strong>Language and perception:</strong> Winawer, J. et al. (2007). Russian blues reveal effects of language on color discrimination. <em>Proceedings of the National Academy of Sciences</em>, 104(19), 7780-7785.</p>
+
+<p><strong>Schema therapy:</strong> Young, J.E., Klosko, J.S. & Weishaar, M.E. (2003). <em>Schema Therapy: A Practitioner's Guide</em>. Guilford Press.</p>
+
+<p><strong>Trauma and the body:</strong> Van der Kolk, B. (2014). <em>The Body Keeps the Score</em>. Viking. Levine, P. (1997). <em>Waking the Tiger</em>. North Atlantic Books.</p>
+
+<p><strong>Transference in social cognition:</strong> Andersen, S.M. & Chen, S. (2002). The relational self: an interpersonal social-cognitive theory. <em>Psychological Review</em>, 109(4), 619-645.</p>
+
+<p><strong>Focusing:</strong> Gendlin, E.T. (1981). <em>Focusing</em>. Bantam Books.</p>
+
+<p><strong>Art and perception:</strong> Edwards, B. (1979). <em>Drawing on the Right Side of the Brain</em>. Tarcher. Berger, J. (1972). <em>Ways of Seeing</em>. Penguin.</p>
+
+<p><strong>Phenomenology:</strong> Heidegger, M. (1927/1962). <em>Being and Time</em>. Trans. Macquarrie & Robinson. Harper & Row.</p>
+
+<p><strong>Projective identification:</strong> Bion, W.R. (1962). <em>Learning from Experience</em>. Heinemann.</p>
+
+<p><strong>LLM framing effects:</strong> ArXiv preprints on directional presupposition and pragmatic framing in LLMs (2025). <em>Science Advances</em> (2025) on attribution framing and cultural bias in language models.</p>
+
+<p><strong>Pen test data:</strong> 4-condition study (N=12), Claude Opus 4.6, February 28, 2026. Full data in <code>memory/pen-test.md</code>. Squad research reports in <code>~/.claude/squad/missions/</code>.</p>
+
+<p><strong>Original experiment:</strong> A woman, a pen, a Saturday night.</p>
+
+</div>
+
+</body>
+</html>
